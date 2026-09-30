@@ -1,0 +1,77 @@
+name: 功能建议
+description: 想要某个 UI 能力 / 想要现有 API 多一个参数
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        这张表只问一件事：**你想做什么效果**。先写效果，再说实现 —— 很多需求现有 API 拼一下就能做，
+        下面「现在怎么绕」那栏就是干这个的。
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 你想做出什么效果
+      description: 一两句话；有参考（别的数据包 / 某个游戏 / 视频）就贴链接
+      placeholder: 想让 bossbar 的进度条随某个计分板数值实时变化，而不是只在开始时定住
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: 和哪个模块有关
+      options:
+        - Actionbar（屏幕下方的常驻文本）
+        - Countdown（倒计时）
+        - Bossbar（血条样式的条）
+        - Alert（大标题 / 副标题）
+        - Flash（闪烁）
+        - Chat / Sound / Separator
+        - XPbar（经验条）
+        - Clear / remove（清理）
+        - 说不好 / 是新的模块
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 现在怎么绕（如果已经绕过了）
+      description: 贴你现在的调用串；绕不过去就写"绕不过去"
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: 你希望它长什么样
+      description: 理想情况下的调用串（API 是 `{with:{…}}` 宏参数，`targets` 默认 @s）
+      render: mcfunction
+      placeholder: |
+        function doom.ui:api/bossbar_update {with:{bid:"default",progress_from:"obj"}}
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scale
+    attributes:
+      label: 大概有多少玩家会同时用到
+      options:
+        - 单人
+        - 几个人（<10）
+        - 一二十人
+        - 几十人以上（要考虑每拍命令量）
+        - 不确定
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我看过 [用法与 API](https://github.com/DoomDecapitator/doom.ui/blob/main/docs/02-用法与API.md)，现有 API 拼不出这个效果
+          required: false

@@ -1,0 +1,105 @@
+name: Bug 报告
+description: 装了 doom.ui 之后出现异常（UI 不显示 / 显示不对 / 报错 / 卡顿）
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先谢谢你来报问题 🙏 这份表单要的几样东西（版本、环境、日志、复现步骤）是定位问题的全部线索 ——
+        缺哪样都可能让排查原地打转。**能让世界复现的最小步骤**最值钱。
+
+        报之前顺手看一眼：[已知限制](https://github.com/DoomDecapitator/doom.ui/blob/main/CHANGELOG.md)
+        与 [用法与 API](https://github.com/DoomDecapitator/doom.ui/blob/main/docs/02-用法与API.md)。
+
+  - type: input
+    id: pack_version
+    attributes:
+      label: 包版本
+      description: zip 文件名里的版本号（例如 v2.0-beta），或 `dist/*.zip` 的名字
+      placeholder: v2.0-beta
+    validations:
+      required: true
+
+  - type: input
+    id: schedule_version
+    attributes:
+      label: 依赖的 doom.schedule 版本
+      description: 本包依赖 doom.schedule v2+（alert / flash / actionbar 淡出的延迟回调）。没装或版本旧就会静默失效
+      placeholder: doom.schedule v2.x / 没装 / 不确定
+    validations:
+      required: true
+
+  - type: input
+    id: mc_version
+    attributes:
+      label: Minecraft 版本与运行方式
+      description: 游戏版本 + 单人存档还是服务器（服务器请写服务端类型，例如 Fabric / Paper，及是否装模组）
+      placeholder: 1.21.6 · 单人存档 / 1.21.6 · Fabric 服务器
+    validations:
+      required: true
+
+  - type: input
+    id: checksum
+    attributes:
+      label: 校验值核对结果
+      description: 对过 `dist/SHA256SUMS.txt` 里的 sha256 吗（PowerShell：`(Get-FileHash dist\doom.ui-v2.0-beta.zip -Algorithm SHA256).Hash`）？结果是什么
+      placeholder: 一致 / 不一致 / 没跑
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤（最小步骤）
+      description: 从进世界开始，一步步写；把**你实际敲的那一条 /function 命令**原样贴上来
+      placeholder: |
+        1. 新建 1.21.6 世界，装 doom.ui + doom.schedule，/reload
+        2. /function doom.ui:api/countdown {with:{targets:"@a",prefix:[{"text":"倒计时","color":"gold"}],time:10}}
+        3. 倒计时只走了 3 秒就没了
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望什么 / 实际发生了什么
+      placeholder: |
+        期望：屏幕中部显示 10..1 的倒计时，结束后触发 on_fade
+        实际：3 秒后消失，on_fade 没触发
+    validations:
+      required: true
+
+  - type: textarea
+    id: state
+    attributes:
+      label: 现场状态（可选但很有用）
+      description: 有权限的话贴 `/data get storage doom.ui:ctx` 或 `/data get storage doom.ui:mixer` 的输出片段；多人服请写同时在线的玩家数
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志片段
+      description: `logs/latest.log` 里与 doom.ui 有关的行（尤其 "Failed to load function"、"Command execution stopped due to limit"、报错栈）
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图 / 录屏
+      description: 直接拖图片进来；UI 显示问题**有图最好定位**
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我贴的日志 / 截图里没有个人信息（服务器 IP、玩家 UUID、token 等）
+          required: true
