@@ -1,0 +1,102 @@
+/// Storage: doom.ui:ctx - Doom UI runtime data
+dispatch minecraft:storage["doom.ui:ctx"] to struct{
+    /// API input parameters (with: for actionbar/alert/flash/countdown/bossbar/etc)
+    with?: struct{
+        /// Target players selector (e.g. "@a", "@s")
+        targets?: string,
+        /// Actionbar content (JSON text component or list)
+        content?: any,
+        /// Display duration in ticks (actionbar/alert/bossbar)
+        time?: int,
+        /// Duration alias for time (actionbar/bossbar)
+        duration?: int,
+        /// Slot name (actionbar/countdown)
+        slot?: string,
+        /// Fade-out animation on expiry (actionbar)
+        fade?: boolean,
+        /// Alert title (JSON text component)
+        title?: any,
+        /// Alert subtitle (JSON text component)
+        subtitle?: any,
+        /// Alert fade-in ticks
+        fade_in?: int,
+        /// Alert fade-out ticks
+        fade_out?: int,
+        /// Alert stay ticks (alias for time)
+        stay?: int,
+        /// Flash count
+        count?: int,
+        /// Flash interval ticks
+        interval?: int,
+        /// Countdown prefix (JSON text component)
+        prefix?: any,
+        /// Countdown seconds
+        seconds?: int,
+        /// Mixer priority (higher = first; actionbar 50/countdown 20/flash 40/alert 30)
+        priority?: int,
+        /// Bossbar name (JSON text component)
+        name?: any,
+        /// Bossbar color: blue/green/pink/purple/red/white/yellow
+        color?: string,
+        /// Bossbar style: progress/notched_6/notched_10/notched_12/notched_20
+        style?: string,
+        /// Bossbar id (for bossbar_update/bossbar_remove)
+        bid?: string,
+        /// Bossbar new max value (for bossbar_update)
+        new_time?: int,
+        /// Bossbar show seconds countdown (1 = show time as seconds)
+        countdown?: boolean,
+        /// Bossbar name separator (default ": ")
+        sep?: string,
+        /// Sound id (e.g. "minecraft:entity.experience_orb.pickup")
+        sound?: string,
+        /// Sound source: master/music/record/weather/block/hostile/neutral/player/ambient/voice
+        source?: string,
+        /// Sound volume
+        volume?: double,
+        /// Sound pitch
+        pitch?: double,
+        /// Separator style (JSON text component)
+        separator?: any,
+        /// Callback on fade (command string)
+        on_fade?: #[command] string,
+        /// Callback on interrupt (command string)
+        on_interrupt?: #[command] string,
+        /// Callback command run on interrupt (command string)
+        on_interrupted_run?: #[command] string,
+        /// Clear type: 1=countdown 2=actionbar 3=player 4=bossbar (for api/clear)
+        type?: int,
+    },
+    /// Internal runtime - per-player sessions
+    sessions?: any,
+    /// Internal runtime - active bossbars
+    active_bossbars?: [struct{ sid: int }],
+    /// Internal runtime - bossbar registry
+    bossbars?: [any],
+    /// Per-uid rendered actionbar title root
+    tr?: [any],
+    /// Internal - session id (bossbar entry)
+    sid?: int,
+    /// Internal - temp working values
+    temp?: any,
+    /// Internal - bossbar show seconds flag
+    show_sec?: int,
+    /// Other runtime data
+    [string]: any,
+}
+
+/// Storage: doom.ui:mixer - mixer rendering data
+dispatch minecraft:storage["doom.ui:mixer"] to struct{
+    /// Per-player mixer entries (content segments)
+    data?: [struct{
+        uid: int,
+        content: [struct{
+            id: string,
+            priority: int,
+            text: any,
+            type: string,
+        }],
+        separator: any,
+    }],
+    [string]: any,
+}
