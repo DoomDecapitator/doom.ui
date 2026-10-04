@@ -57,7 +57,7 @@ Windows PowerShell:   (Get-FileHash .\doom.ui-v2.0-beta.zip -Algorithm SHA256).H
 
 | 文件 | sha256 |
 |---|---|
-| `doom.ui-v2.0-beta.zip` | `d55df67d1f32e8433e8f92900d72862feddf35b71876900656f40c56a50f8ed7` |
+| `doom.ui-v2.0-beta.zip` | `55efacb18291221c9b466ead157f515bb271205d72ee0a8bbf11ae14b7cf98d0` |
 
 > 这个值不是手抄的：`node src/tools/make_dist.mjs --check` 会把"现在重新打一次"的字节与 `dist/` 里的 zip 逐字节比，
 > 不一致就报错。你重新打包得到的 hash 应当与上表完全相同。

@@ -8,6 +8,8 @@ data remove storage doom.ui:ctx sessions
 data modify storage doom.ui:ctx sessions set value {}
 data remove storage doom.ui:mixer data
 data modify storage doom.ui:mixer data set value []
+# [D17 fix] also drop the countdown-time lookup table (doom.ui:ctx cd_time.<slot>)
+data remove storage doom.ui:ctx cd_time
 data remove storage doom.ui:ctx active_bossbars
 data modify storage doom.ui:ctx active_bossbars set value []
 data remove storage doom.ui:ctx bossbars

@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-10-04 · D17 修复（countdown 数字被草稿区清空）
+
+- **现象**：装了 countdown 之后，只要调用**任何别的 API**（alert / flash / actionbar / bossbar…），
+  屏幕上正在跳的倒计时数字**立刻变空** —— 修复前显示 `CLEAN: s`（数字没了），修复后是 `CLEAN: 17s`。
+- **根因**：countdown 把剩余秒数写在 `doom.ui:ctx _.cd_time.<slot>`，而**每个 API 入口的第一行都是**
+  `data remove storage doom.ui:ctx _`（清草稿区）。两者**共用同一个键** ⇒ 别的 API 一进来就把倒计时时间顺手删了。
+  这是**键空间冲突**，不是 countdown 自身的逻辑错。
+- **修法**：把倒计时时间表搬到**独立键** `doom.ui:ctx cd_time`（不再挂在草稿区 `_` 下）：
+  - `internal/countdown/cd_tick_slot.mcfunction`：写入口与显示引用改指 `cd_time.$(slot)`（2 行）；
+    过期分支补一行 `data remove storage doom.ui:ctx cd_time.$(slot)`，防止时间表随槽位累积（1 行）。
+  - `api/silent_clear_all.mcfunction`：在 `# Nuke all storage` 段补 `data remove storage doom.ui:ctx cd_time`（1 行）。
+  - `__debug__.mcfunction`：调试读取路径同步改成 `cd_time`（1 行）。
+- **验证**（三组证据）：
+  - **数据面**：连打 **70+ 次 API**（含 alert / flash）后，`cd_time` 的 `t1` / `v1` / `sp2` **全部存活且正常递减**。
+  - **视觉面**：玩家真机实测屏幕显示 **`CLEAN: 17s`**，数字**持续跳动**（修复前是 `CLEAN: s`，数字位为空）。
+  - **回归面**：无人环境 `verify_show.mjs --cam` = **44 PASS / 0 FAIL**；`verify_callbacks.mjs` = **23 PASS / 0 FAIL**；
+    新增清理用例：调 `silent_clear_all` 后 `cd_time` 被清空，清完重建倒计时仍正常递减（**38 → 34**）。
+- **产物**：`dist/doom.ui-v2.0-beta.zip`（**142 文件 / 166 条目**，88409 B，sha256 `55efacb18291221c9b466ead157f515bb271205d72ee0a8bbf11ae14b7cf98d0`）。
+  与上一版 zip 逐项 diff：**仅这 3 个文件变化，0 增 0 删**；`node src/tools/make_dist.mjs --check` 逐字节一致。
+
 ## 2026-09-29 · 仓库改版（本仓库结构）
 
 - **顶层收到玩家向形态**：`README.md`（首屏四问）· `LICENSE` · `CHANGELOG.md` · `dist/` · `docs/`（玩家手册 5 篇）

@@ -14,14 +14,14 @@ execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _
 execute if score #orig dt.temp matches 2.. run data remove storage doom.ui:ctx _.seg_color
 execute if score #orig dt.temp matches 2.. if data storage doom.ui:ctx _.temp.prefix[0].color run data modify storage doom.ui:ctx _.seg_color set from storage doom.ui:ctx _.temp.prefix[0].color
 execute if score #orig dt.temp matches 2.. if data storage doom.ui:ctx _.temp.prefix.color run data modify storage doom.ui:ctx _.seg_color set from storage doom.ui:ctx _.temp.prefix.color
-$execute if score #orig dt.temp matches 2.. run execute store result storage doom.ui:ctx _.cd_time.$(slot) int 1 run scoreboard players get #time dt.temp
+$execute if score #orig dt.temp matches 2.. run execute store result storage doom.ui:ctx cd_time.$(slot) int 1 run scoreboard players get #time dt.temp
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg set value {text:"","extra":[]}
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg.color set from storage doom.ui:ctx _.seg_color
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg.extra append from storage doom.ui:ctx _.temp.prefix
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg.extra append value {text:": ",color:"white"}
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg_time set value {"text":"","extra":[]}
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg_time.color set from storage doom.ui:ctx _.seg_color
-$execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg_time.extra append value {"nbt":"_.cd_time.$(slot)","storage":"doom.ui:ctx"}
+$execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg_time.extra append value {"nbt":"cd_time.$(slot)","storage":"doom.ui:ctx"}
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg.extra append from storage doom.ui:ctx _.seg_time
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg_s set value {text:"s"}
 execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx _.seg_s.color set from storage doom.ui:ctx _.seg_color
@@ -35,6 +35,8 @@ execute if score #orig dt.temp matches 2.. run function doom.ui:internal/mixer/s
 $execute if score #orig dt.temp matches 2.. run data modify storage doom.ui:ctx sessions.cd_$(uid) append from storage doom.ui:ctx _.temp
 
 # Expired: original time <= 1
+# [D17 fix] drop the countdown time key when the slot expires (doom.ui:ctx cd_time.<slot>)
+$execute if score #orig dt.temp matches ..1 run data remove storage doom.ui:ctx cd_time.$(slot)
 execute if score #orig dt.temp matches ..1 run data modify storage doom.ui:ctx _.id set from storage doom.ui:ctx _.slot_processing.id
 execute if score #orig dt.temp matches ..1 run function doom.ui:internal/mixer/remove_segment with storage doom.ui:ctx _
 execute if score #orig dt.temp matches ..1 if data storage doom.ui:ctx _.slot_processing.on_fade run function doom.ui:internal/exec_on_fade with storage doom.ui:ctx _.slot_processing

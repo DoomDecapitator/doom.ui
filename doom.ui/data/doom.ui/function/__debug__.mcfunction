@@ -19,6 +19,6 @@ tellraw @s {"text":"5. Separator（随 mixer 条目，见上面 1）:","color":"
 tellraw @s {"text":"6. Bossbar bid → sid 映射:","color":"yellow"}
 data get storage doom.ui:ctx bb_index
 tellraw @s {"text":"7. Countdown 每槽剩余（_.cd_time）:","color":"yellow"}
-data get storage doom.ui:ctx _.cd_time
+data get storage doom.ui:ctx cd_time
 
 
