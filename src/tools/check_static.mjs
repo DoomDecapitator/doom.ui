@@ -60,8 +60,26 @@ if (!fs.existsSync(mcmetaPath)) add('ERROR', 'pack.mcmeta', 1, '缺少 pack.mcme
 else {
   try {
     const m = JSON.parse(fs.readFileSync(mcmetaPath, 'utf8'));
-    if (!m || !m.pack || !Number.isInteger(m.pack.pack_format)) add('ERROR', 'pack.mcmeta', 1, 'pack.pack_format 必须是整数');
-    if (m && m.pack && !m.pack.description) add('ERROR', 'pack.mcmeta', 1, 'pack.description 缺失（游戏内列表会显示空白）');
+    const pk = m && m.pack;
+    // 1.21.9+ 两种合法形态：
+    //   ① 旧式共存：min_format < 82 ⇒ pack_format + supported_formats 必需
+    //   ② 纯新式  ：min_format >= 82 ⇒ 禁止 supported_formats / pack_format
+    const minF = pk && (Array.isArray(pk.min_format) ? pk.min_format[0] : pk.min_format);
+    const isNewOnly = Number.isInteger(minF) && minF >= 82;
+    if (isNewOnly) {
+      if (!Number.isInteger(pk.max_format)) add('ERROR', 'pack.mcmeta', 1, '纯新式（min_format>=82）必须有整数 max_format');
+      if (pk.pack_format !== undefined || pk.supported_formats !== undefined)
+        add('ERROR', 'pack.mcmeta', 1, 'min_format>=82 时禁止 pack_format / supported_formats（触及 82+ 即被拒）');
+    } else {
+      if (!pk || !Number.isInteger(pk.pack_format)) add('ERROR', 'pack.mcmeta', 1, 'pack.pack_format 必须是整数');
+    }
+    if (pk && !pk.description) add('ERROR', 'pack.mcmeta', 1, 'pack.description 缺失（游戏内列表会显示空白）');
+    // 共存形态的一致性铁律：min_format == sf.min_inclusive，max_format == sf.max_inclusive
+    if (pk && pk.supported_formats) {
+      const sfMin = pk.supported_formats.min_inclusive, sfMax = pk.supported_formats.max_inclusive;
+      if (minF !== sfMin) add('ERROR', 'pack.mcmeta', 1, 'min_format(' + minF + ') != supported_formats.min_inclusive(' + sfMin + ')');
+      if (pk.max_format !== sfMax) add('ERROR', 'pack.mcmeta', 1, 'max_format(' + pk.max_format + ') != supported_formats.max_inclusive(' + sfMax + ')');
+    }
   } catch { /* ① 已报 */ }
 }
 

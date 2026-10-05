@@ -14,9 +14,9 @@
 
 **下载**：
 - [`dist/doom.ui-v2.1.0.zip`](dist/doom.ui-v2.1.0.zip) —— **1.21.9 – 1.21.10**（主用）
-  · sha256 `b568711c2b0fc544c53eed9a97b44295fc89275f9374465d4395c3ffa42b2088`
+  · sha256 `a43b25377843e18e10a76dbcb7a0ee58f638a2c45ae52f88d03787b796ed2ddc`
 - [`dist/doom.ui-v2.1.0-mc1.21.11+.zip`](dist/doom.ui-v2.1.0-mc1.21.11+.zip) —— **1.21.11 – 26.3**
-  · sha256 `327a7915c3d9804c03829a3cf41b908d690b6adc9412d30e17da0d4ce0fb8e1a`
+  · sha256 `70871ac529587644f5a019672d0d9de7e6f3dff6e9f7abcb3c56f889e6c6f83e`
 - [`dist/doom.ui-v2.1.0-mc1.21.6-1.21.8.zip`](dist/doom.ui-v2.1.0-mc1.21.6-1.21.8.zip) —— **1.21.6 – 1.21.8**
   · sha256 `e3ae746c8ee73a502b1a2561b09431b9ec6a983a56a139f61878d817695a71e7`
 
@@ -113,7 +113,40 @@ CHANGELOG 与 README 原先写「**53 用例 / 335 断言**」✗ —— **实�
 
 > 顺带修正文档里的 `53 PASS / 0 FAIL` 口径表述 → `53 PASS / 0 FAIL`。
 
-### 五、能核对什么
+### 五、M6 修正：两份 modern 变体的 `pack.mcmeta` 自称区间不收宽
+
+发版前复核发现（M6 判据：**自称区间不能宽于实际能力**）：
+
+| 变体 | 原自称 | 实际能力 | 问题 |
+|---|---|---|---|
+| `v2.1.0`（1.21.9–1.21.10） | 48–121（→ MC 1.21–26.3） | 只到 **1.21.10** | 装上 1.21.11+ 会被加载，但 gamerule 旧名 ⇒ **__load__ 整支失败** ✗ |
+| `v2.1.0-mc1.21.11+` | 48–121（→ MC 1.21–26.3） | 只从 **1.21.11** 起 | 下界自称过宽（1.21.6–1.21.10 实际不可用）✗ |
+
+**修法**：两份都改成**纯新式**（只留 `min_format`/`max_format`，删掉 `supported_formats` 与 `pack_format`）——
+按 §1.4 规则 4，声明范围**触及 82+** 就禁止 `supported_formats`：
+
+```jsonc
+// v2.1.0（1.21.9–1.21.10）—— 88.0 = 1.21.9/1.21.10 的 data format
+{ "pack": { "min_format": [88, 0], "max_format": 88,  "description": "…" } }
+// v2.1.0-mc1.21.11+    —— 94.1 = 1.21.11 的 data format
+{ "pack": { "min_format": [94, 1], "max_format": 121, "description": "…" } }
+```
+
+> `mc1.21.6-1.21.8` 变体**不动**（1.21.6–1.21.8 **不认** `min_format`/`max_format`，必须保留旧式 mcmeta）。
+
+**改后复跑（26.3 · Java 25 · 真机）**：
+
+```
+/reload 后 8 类门槛 + deprecation 告警 = 0 行 ✓
+[file/doom.ui (world)] 正常装载 ✓
+gamerule max_command_sequence_length -> 2147483647   ← 修复生效 ✓
+function doom.ui:__load__            -> Running function doom.ui:__load__ ✓
+[SELFTEST] RESULT pass=15 fail=0 total=15             ← 15/15 全过 ✓
+```
+
+> 该结果与"收紧前 mcmeta"的基线**逐条一致**（同为 15/15），且**收紧后 0 条 deprecation 告警** ⇒ 证明收紧只去掉了过宽的声明，没有削弱任何真实能力 ✓。
+
+### 六、能核对什么
 
 - 三份 zip 内各 **142 个文件条目**与仓库对应包体目录下同名文件**逐字节相同**（各 0 差异）。
 - `node src/tools/make_dist.mjs --check` **逐字节自证**（三份全 ✅）。
