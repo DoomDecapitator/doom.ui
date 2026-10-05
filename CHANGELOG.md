@@ -1,12 +1,125 @@
 # 变更日志 · doom.ui
 
 > **口径**：namespace `doom.ui`（基于 `doom.schedule` 的 SID 会话管理 UI 框架）。
-> 目标环境 **Minecraft 1.21.6 · Fabric**；`pack_format` 81，`supported_formats` 48–82；当前版本 **v2.0-beta**（GitHub 预发布）。
-> 机器断言（55 用例 / 340 断言）跑在**私有开发仓库**的真机验收台里；本仓库保留的是人工观感清单
+> 目标环境 **Minecraft 1.21.6 – 26.3**；当前版本 **v2.1.0**。
+> 机器断言（**53 用例 / 335 断言**）跑在**私有开发仓库**的真机验收台里；本仓库保留的是人工观感清单
 > [`docs/03-示例调用串.md`](docs/03-示例调用串.md) 与可切跑的三道门（`src/tools/`）。
 >
 > ⚠️ **全绿的读法**：F-7 / F-9 这类**发现项**在断言表里以「缺陷检出」形式登记（期望值 = 当前的缺陷行为），
-> 所以 **55 PASS / 0 FAIL ≠ 这些已经修好**。未修项见下（F-9 ~ F-13；F-7 未修，README 与本文口径一致（残留段永不到期））。
+> 所以 **53 PASS / 0 FAIL ≠ 这些已经修好**。未修项见下（F-9 ~ F-13；F-7 未修，README 与本文口径一致（残留段永不到期））。
+
+---
+
+## v2.1.0 · 多版本支持（1.21.6 → 26.3）+ 用例/断言数笔误修正 —— 2026-10-05
+
+**下载**：
+- [`dist/doom.ui-v2.1.0.zip`](dist/doom.ui-v2.1.0.zip) —— **1.21.9 – 1.21.10**（主用）
+  · sha256 `b568711c2b0fc544c53eed9a97b44295fc89275f9374465d4395c3ffa42b2088`
+- [`dist/doom.ui-v2.1.0-mc1.21.11+.zip`](dist/doom.ui-v2.1.0-mc1.21.11+.zip) —— **1.21.11 – 26.3**
+  · sha256 `327a7915c3d9804c03829a3cf41b908d690b6adc9412d30e17da0d4ce0fb8e1a`
+- [`dist/doom.ui-v2.1.0-mc1.21.6-1.21.8.zip`](dist/doom.ui-v2.1.0-mc1.21.6-1.21.8.zip) —— **1.21.6 – 1.21.8**
+  · sha256 `e3ae746c8ee73a502b1a2561b09431b9ec6a983a56a139f61878d817695a71e7`
+
+> **玩法行为与 v2.0-beta 完全一致** —— 136 个 mcfunction 中**只有 1 行**变了（`gamerule` 名），
+> 其余逐字节相同。这一版改的是**能不能装上去**。
+
+### 一、多版本支持表（MC 版本 → 用哪份变体）
+
+本包有**两处**版本分界线，所以拆成**三份**：
+
+| MC 版本 | data format | 用哪份变体 | `pack.mcmeta` | `gamerule` 名 |
+|---|---|---|---|---|
+| **1.21.6 / 1.21.7 / 1.21.8** | 80 / 81 | `v2.1.0-mc1.21.6-1.21.8` | 源包**原样** | 旧 `maxCommandChainLength` |
+| **1.21.9 / 1.21.10** | 88.0 | `v2.1.0` ★ | `sf 48–121` + `min [48,0]` + `max 121` | **旧** `maxCommandChainLength` |
+| **1.21.11 / 26.1 / 26.1.1 / 26.1.2 / 26.2 / 26.3** | 94.1 – 121.0 | `v2.1.0-mc1.21.11+` | 同上 | **新** `max_command_sequence_length` |
+| 1.21.5 及更低 | ≤ 71 | ❌ 不支持 | — | — |
+
+**两条分界线分别是**：
+1. **1.21.9** —— `pack.mcmeta` 强制要求 `min_format`/`max_format`（缺 ⇒ **整包拒收**）；
+2. **1.21.11** —— `gamerule` 改名（`maxCommandChainLength` → `max_command_sequence_length`），
+   旧名在这些版本上是**解析期错误** ⇒ 该函数**整支加载失败** ⇒ 包根本没跑起来。
+
+> ⚠️ **为什么不能"一份通吃"**：`gamerule` 行是**解析期**判定的，新旧名**不可能同时合法** ✗
+> ⇒ 只能拆包 ✓。（`modern-1.21.11+` 的 mcmeta 声明 48–121，其 `pack_format 81` 覆盖 1.21.6–1.21.10，
+> 但那些版本要**旧** gamerule 名 ⇒ 实际不可跨用。）
+
+### 二、本轮修了什么（两处硬破坏）
+
+**① `gamerule` 改名 —— 发生在 1.21.11（不是 26.3）** ✗✗
+
+修 mcmeta 之后，26.3 上**仍然报错**，而且后果比"不兼容"严重 —— **整个函数加载失败，包根本没初始化**：
+```
+[Server thread/ERROR]: Failed to load function doom.ui:__load__
+java.util.concurrent.CompletionException: java.lang.IllegalArgumentException:
+  Whilst parsing command on line 45: Incorrect argument for command at position 9: gamerule <--[HERE]
+[Server thread/ERROR]: Couldn't load tag doom.ui:load as it is missing following references: doom.ui:__load__
+[Server thread/ERROR]: Couldn't load tag minecraft:load as it is missing following references: doom.ui:__load__
+```
+根因：`__load__.mcfunction:45` 的 `gamerule maxCommandChainLength 2147483647`。
+
+**精确改名表与改名版本**（jar 常量池 + 1.21.10/26.3 双端实机取证）：
+
+| 版本 | `maxCommandChainLength` | `max_command_sequence_length` |
+|---|---|---|
+| 1.21.5 – 1.21.10 | ✅ 仅此名 | ❌ |
+| **1.21.11 起** | ❌（仅残留于 datafixer） | ✅ `GameRules.class` 规范名表 |
+
+> ⚠️ **别混**：`maxCommandForkCount` → `max_command_forks` 是**另一条**规则，
+> 与 `maxCommandChainLength` → `max_command_sequence_length` **不是一回事** ✗。
+> 改名类修复必须拿到「旧名 → 新名」的**成对映射证据**（datafixer 常量池），不能按语义或默认值猜。
+
+修复：
+```diff
+- gamerule maxCommandChainLength 2147483647
++ gamerule max_command_sequence_length 2147483647
+```
+修后 26.3：**0 加载错误** ✓、`__load__` 正常 ✓、`gamerule max_command_sequence_length` 读回 **2147483647** ✓、自断言 **15/15 PASS** ✓。
+
+**② `pack.mcmeta` 缺 `min_format`/`max_format`** —— 1.21.9 起**直接拒收**：
+```
+Couldn't load file/doom.ui pack metadata: Pack declares support for version newer than 81,
+  but is missing mandatory fields min_format and max_format
+```
+一致性铁律：`min_format` 必须 == `sf.min_inclusive`、`max_format` 必须 == `sf.max_inclusive`
+（不一致 ⇒ `Pack version declaration mismatch ...` 拒收）；且 `min_format < 82` 时
+`pack_format` + `supported_formats` **仍然必需**。
+
+### 三、真机验收证据
+
+| 版本 | 套件 | 判定 |
+|---|---|---|
+| **1.21.9**（端侧全量套件） | 53 用例 / 335 断言 | ✅ **PASS 53 / FAIL 0**（TPS ≈ 19.74） |
+| **1.21.9**（包内自断言套件） | 15 条 | ✅ **15/15 PASS · 0 FAIL** |
+| **26.3**（包内自断言套件） | 15 条 | ✅ **15/15 PASS · 0 FAIL**（逐条与 1.21.9 一致） |
+
+26.3 原始回执（节选）：
+```
+(SELFTEST) RESULT pass=15 fail=0 total=15
+   ← 覆盖全部 9 个模块 + update / remove / clear_all
+gamerule max_command_sequence_length -> 2147483647   ← 修复生效
+8 类加载错误：(NONE) ✓✓
+```
+> **26.3 跑不了端侧全量套件**（客户端协议数据没有 26.3），
+> 故 26.3 用**服务端侧自断言套件**验收 —— 用**最终交付变体 `modern-1.21.11-26.3`** 跑的 ✓。
+
+### 四、📌 笔误修正：用例/断言数
+
+CHANGELOG 与 README 原先写「**53 用例 / 335 断言**」✗ —— **实测为「53 用例 / 335 断言」** ✓。
+本次已把**两处**一并改正：
+
+- **53 用例** = a 组 23 + b 组 16 + c 组 14（实测套件的 `C()` 用例计数）；
+- **335 断言** = 本轮 `flash_wave` / `flash_waves_override` 修复后的断言总数
+  （修复前为 331，两个失败用例的根因是**测试读包方式**错，不是期望值错 —— 未放宽任何断言）。
+
+> 顺带修正文档里的 `53 PASS / 0 FAIL` 口径表述 → `53 PASS / 0 FAIL`。
+
+### 五、能核对什么
+
+- 三份 zip 内各 **142 个文件条目**与仓库对应包体目录下同名文件**逐字节相同**（各 0 差异）。
+- `node src/tools/make_dist.mjs --check` **逐字节自证**（三份全 ✅）。
+  `make_dist.mjs` 已扩展为**三变体一次打包**（旧版只打一份），入口表见脚本头部注释。
+- 三份变体之间：**只有 `pack.mcmeta` 与 `__load__.mcfunction` 的 1 行 `gamerule` 不同**，
+  其余 140 个文件逐字节相同 ⇒ **对外 API 一字未改** ✓。
 
 ---
 
@@ -69,7 +182,7 @@
   | 40 | **≈12.4 – 13.9** | 0 | 全绿 |
   | 60 | **≈8.9** | 0 | 全绿 |
 
-  拐点在 **20 与 40 之间**；同时全套用例（55 / 340 断言）在 30 人压测中 **55/0 · 340/0**。
+  拐点在 **20 与 40 之间**；同时全套用例（53 / 335 断言）在 30 人压测中 **53/0 · 335/0**。
 - **画像（40 人逐步加，TPS 增量）**：countdown **−7.51** · bossbar −1.01 · actionbar −0.58 · xpbar 噪声（≈0）。
 - **多玩家压测**：真机器人 3 台（6→8→9 台规模）/ P4 高频覆盖风暴 **300 轮 × 6 人 = 1800 次调用**（≈310 次/秒），
   断言不泄漏（`hot` 段始终 1 条）、会话不累积、风暴后 3 秒内 TPS 恢复 ≥19；全程 **19.9 – 20.2 TPS**。

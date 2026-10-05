@@ -13,7 +13,7 @@
 //      历史里还留着一个 0 字节空文件）；doom.nats 那边同一次事故混进过 9 个。从此顶层结构也过门。
 //
 //   玩家向仓库顶层允许：README.md · LICENSE · CHANGELOG.md · .gitignore · .gitattributes
-//                      · dist/ · docs/ · src/ · .github/ · doom.ui/
+//                      · dist/ · docs/ · src/ · .github/ · doom.ui/ · variants/
 //   未跟踪但躺在工作目录里的可疑条目：只警告（下一次 `git add -A` 就会被带进仓库）。
 import fs from 'node:fs';
 import path from 'node:path';
@@ -40,7 +40,7 @@ const SELF = ['src/tools/check_leak.mjs'];
 
 // ② 顶层白名单
 const ALLOW = new Set(['README.md', 'LICENSE', 'CHANGELOG.md', '.gitignore', '.gitattributes',
-  'dist', 'docs', 'src', '.github', 'doom.ui']);
+  'dist', 'docs', 'src', '.github', 'doom.ui', 'variants']);
 // 这两个文件是二进制/生成物，跳过文本扫描
 const SKIP_EXT = /\.(zip|png|jpg|jpeg|gif|webp|ico|pdf|jar|dat|mca)$/i;
 

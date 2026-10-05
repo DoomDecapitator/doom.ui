@@ -7,7 +7,7 @@
 
 | 位置 | 是什么 | 给谁 |
 |---|---|---|
-| [`../dist/`](../dist) | **成品**：`doom.ui-v2.0-beta.zip` + `SHA256SUMS.txt` | 只想装进存档玩的玩家 —— **你多半只要这个** |
+| [`../dist/`](../dist) | **成品**：三份变体 zip + `SHA256SUMS.txt` | 只想装进存档玩的玩家 —— **你多半只要这个** |
 | [`../doom.ui/`](../doom.ui/data/doom.ui/function) | **数据包本体（就是源码）**：每个 mcfunction 都能直接点开看 | 想知道"它到底怎么写的"、想自己改的人 |
 | `src/`（本目录） | **门与打包**：静态门 / 结构门 / 打包脚本 | 想改包后自证没写坏、想自己发一版的人 |
 
@@ -29,7 +29,7 @@ node src/tools/check_static.mjs
 
 # ③ 打包发行物（zip 内顶层目录 = doom.ui/）
 node src/tools/make_dist.mjs
-#    产出 dist/doom.ui-v2.0-beta.zip 与 dist/SHA256SUMS.txt，并打印 sha256
+#    产出 dist/ 下三份变体 zip 与 dist/SHA256SUMS.txt，并打印各自 sha256
 ```
 
 **装配进存档**：把 `doom.ui/` 整个复制到 `<存档>/datapacks/`（服务器 `world/datapacks/`）→ 进游戏 `/reload`。
@@ -56,7 +56,7 @@ node src/tools/make_dist.mjs
 
 | 不能直接跑（要开发仓库或外部环境） | 为什么 |
 |---|---|
-| 真机验收台（55 用例 / 340 断言，支持只跑一组 / 只跑一条，退出码 0=PASS） | 要一台开着 RCON 的 1.21.6 Fabric 服务端 + 一个存档 + 一个真实客户端。测试台在**私有开发仓库**，普通玩家也不该去碰 |
+| 真机验收台（53 用例 / 335 断言，支持只跑一组 / 只跑一条，退出码 0=PASS） | 要一台开着 RCON 的 1.21.6 Fabric 服务端 + 一个存档 + 一个真实客户端。测试台在**私有开发仓库**，普通玩家也不该去碰 |
 | 压测脚本（`stress_ui_concurrency.mjs` / `stress_ui_extreme.mjs` / `stress_ui_profile.mjs`）（同上） | 要 Carpet 假玩家或多台机器人；产出的是 [CHANGELOG](../CHANGELOG.md) 里那张并发阶梯表 |
 | `/reload` 的加载期门 | 静态门查不出"加载期才炸"的那一类；`check_static` 覆盖的是已知会炸的写法，不是全部 |
 

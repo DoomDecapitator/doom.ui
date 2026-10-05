@@ -1,7 +1,7 @@
 # doom.ui — 数据包 UI 框架（actionbar · countdown · bossbar · alert · flash · xpbar）
 
 [![最新版本](https://img.shields.io/github/v/release/DoomDecapitator/doom.ui?include_prereleases&label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/DoomDecapitator/doom.ui/releases)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.6-3C8527)](docs/04-兼容与版本.md)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.6%20%E2%80%93%2026.3-3C8527)](docs/04-兼容与版本.md)
 [![许可](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF-All%20Rights%20Reserved%20%C2%B7%20Beta-c0392b)](docs/05-致谢与许可.md)
 
 <!-- 首屏效果图位（还没放图）：截一张"倒计时 + 渐暗淡出 + bossbar 同时挂在屏幕上"的图，
@@ -12,7 +12,7 @@
 > 倒计时、血条样式的条（bossbar）、大标题/副标题、闪烁、聊天/音效/分隔符、经验条。
 > 全部走 `{with:{…}}` 宏参数调用，一条 `/function` 就能出效果；驱动循环挂在 `#minecraft:tick` 上，装完即用。
 >
-> **下哪个**：`dist/doom.ui-v2.0-beta.zip` —— 本包**只有一个变体**，没有"默认/实验性"之分，直接下它。
+> **下哪个**：见下面「**MC 版本 → 用哪份变体**」—— 本包有**两条**版本分界线（1.21.9 的 mcmeta、1.21.11 的 gamerule 改名），所以是**三份**变体，按你的 MC 版本挑。
 >
 > **怎么装**：解压得到 `doom.ui/` 文件夹 → 整个丢进 `saves/<你的存档>/datapacks/`（服务器：`world/datapacks/`）
 > → 进游戏 `/reload`。**同时必须装依赖 [doom.schedule](https://github.com/DoomDecapitator/doom.schedule) v2+**，否则 alert / flash / 淡出回调静默失效。
@@ -22,9 +22,10 @@
 > **源码在哪**：包体就在本仓库 [`doom.ui/`](doom.ui/data/doom.ui/function)（每个 mcfunction 都能直接点开看）；
 > 可切跑的门与打包脚本在 [`src/`](src/)；完整细节见下面「源码在哪」。
 
-> ## 当前状态：**v2.0-beta（预发布 / 公测）**
-> 已跑过真机验收：**55 用例 / 340 断言全绿**（1.21.6 · Fabric，30 名玩家同时在线的压测下也是 55/0 · 340/0）。
-> **已知限制逐条留档**在 [CHANGELOG.md](CHANGELOG.md)：**F-7 未修**（countdown 第 21 槽被丢弃时 mixer 段会残留，残留段永不到期）· F-9 ~ F-13 未修。注意口径：**55 PASS / 0 FAIL ≠ 已修**——发现项在断言表里是以「缺陷检出」登记的，见 CHANGELOG 开头那段⚠️说明。
+> ## 当前状态：**v2.1.0** —— 多版本支持 1.21.6 → 26.3
+> 已跑过真机验收：**53 用例 / 335 断言全绿**（1.21.9 · Fabric，30 名玩家同时在线的压测下也是 53/0 · 335/0）；
+> 26.3 另用包内自断言套件验收 **15/15 PASS · 0 加载错误**。
+> **已知限制逐条留档**在 [CHANGELOG.md](CHANGELOG.md)：**F-7 未修**（countdown 第 21 槽被丢弃时 mixer 段会残留，残留段永不到期）· F-9 ~ F-13 未修。注意口径：**53 PASS / 0 FAIL ≠ 已修**——发现项在断言表里是以「缺陷检出」登记的，见 CHANGELOG 开头那段⚠️说明。
 > **可以装进存档玩，但请先备份存档。**
 
 ---
@@ -33,7 +34,7 @@
 
 | 步 | 做什么 |
 |---|---|
-| ① | 下载 [`dist/doom.ui-v2.0-beta.zip`](dist) 与 [`dist/SHA256SUMS.txt`](dist)，对一下后面的 hash |
+| ① | 按「MC 版本 → 用哪份变体」下载对应 zip 与 [`dist/SHA256SUMS.txt`](dist)，对一下后面的 hash |
 | ② | 解压得到 `doom.ui/`，把它**和依赖 `doom.schedule/`** 一起放进 `<存档>/datapacks/`；服务器放 `world/datapacks/` |
 | ③ | 进世界 `/reload`，然后敲一条：`/function doom.ui:api/actionbar {with:{targets:"@a",content:[{"text":"Hello","color":"gold"}],time:200}}` |
 
@@ -50,14 +51,16 @@
 
 ```
 Linux / macOS:        sha256sum -c SHA256SUMS.txt
-Windows PowerShell:   (Get-FileHash .\doom.ui-v2.0-beta.zip -Algorithm SHA256).Hash
+Windows PowerShell:   (Get-FileHash .\doom.ui-v2.1.0.zip -Algorithm SHA256).Hash
 ```
 
 输出 `OK`（或哈希与 `SHA256SUMS.txt` 里那一串相等）就是完整下载；不等就别用，重新下。当前值：
 
 | 文件 | sha256 |
 |---|---|
-| `doom.ui-v2.0-beta.zip` | `55efacb18291221c9b466ead157f515bb271205d72ee0a8bbf11ae14b7cf98d0` |
+| `doom.ui-v2.1.0.zip`（1.21.9–1.21.10） | `b568711c2b0fc544c53eed9a97b44295fc89275f9374465d4395c3ffa42b2088` |
+| `doom.ui-v2.1.0-mc1.21.11+.zip`（1.21.11–26.3） | `327a7915c3d9804c03829a3cf41b908d690b6adc9412d30e17da0d4ce0fb8e1a` |
+| `doom.ui-v2.1.0-mc1.21.6-1.21.8.zip`（1.21.6–1.21.8） | `e3ae746c8ee73a502b1a2561b09431b9ec6a983a56a139f61878d817695a71e7` |
 
 > 这个值不是手抄的：`node src/tools/make_dist.mjs --check` 会把"现在重新打一次"的字节与 `dist/` 里的 zip 逐字节比，
 > 不一致就报错。你重新打包得到的 hash 应当与上表完全相同。
@@ -111,14 +114,25 @@ function doom.ui:api/xpbar      {with:{targets:"@s",time:100}}
   逐条写在 [CHANGELOG.md](CHANGELOG.md)，**不藏着**。报 bug 前先扫一眼。
 - 本包**不自动清理已离线玩家的计分板残留**（每人一条，有界无害；成因与收口结论见 CHANGELOG 的 F-8）。
 
-## 兼容与版本（速查）
+## MC 版本 → 用哪份变体
 
-| 你的环境 | 能不能用 | 要开实验性玩法吗 |
-|---|---|---|
-| Minecraft **1.21.6**（`pack_format` 81） | ✅ | 不用 |
-| 其它版本 | 包会被判版本不符（`supported_formats` 48–82，过旧/过新都会提示） | — |
-| 单人存档 / 服务器 | 都行；服务器用 `world/datapacks/` | — |
-| 缺 `doom.schedule` v2+ | ❌ alert / flash / 淡出回调静默失效 | — |
+| MC 版本 | data format | 用哪份 | `gamerule` 名 | 实测 |
+|---|---|---|---|---|
+| **1.21.6 / 1.21.7 / 1.21.8** | 80 / 81 | `v2.1.0-mc1.21.6-1.21.8` | 旧 | 🟡 源包形态 |
+| **1.21.9 / 1.21.10** | 88.0 | `v2.1.0` ★ | 旧 | ✅ 53/53 + 15/15 |
+| **1.21.11 / 26.1 / 26.1.1 / 26.1.2 / 26.2 / 26.3** | 94.1 – 121.0 | `v2.1.0-mc1.21.11+` | **新** | ✅ 15/15（26.3） |
+| 1.21.5 及更低 | ≤ 71 | ❌ 不支持 | — | — |
+
+**两条分界线**：① **1.21.9** 起强制 `min_format`/`max_format`（缺 ⇒ 整包拒收）；
+② **1.21.11** 起 `gamerule maxCommandChainLength` 改名 `max_command_sequence_length`，
+旧名是**解析期错误** ⇒ 该函数整支加载失败 ⇒ 包根本没跑起来 ✗ ⇒ **新旧名不可能共存，只能拆包**。
+
+| 其他 | 能不能用 |
+|---|---|
+| 单人存档 / 服务器 | 都行；服务器用 `world/datapacks/` |
+| 实验性玩法 | **不需要开任何实验性玩法** |
+| 依赖 [doom.schedule](https://github.com/DoomDecapitator/doom.schedule) | **v2.3+**，同样按 MC 版本选变体 |
+| 缺 `doom.schedule` v2+ | ❌ alert / flash / 淡出回调静默失效 |
 
 完整的版本矩阵与升级/降级建议见 [`docs/04-兼容与版本.md`](docs/04-兼容与版本.md)。
 
@@ -126,14 +140,14 @@ function doom.ui:api/xpbar      {with:{targets:"@s",time:100}}
 
 - **数据包本体（mcfunction 源码，可直接点开）**：[`doom.ui/`](doom.ui/data/doom.ui/function) —— 里面就是这只包实际装入游戏的每个函数文件；
   `doom.ui/pack.mcmeta` 是包描述，`doom.ui/mcdoc/` 是给 Spyglass / Misode 用的编辑器提示。
-- **下载用的成品**：[`dist/`](dist) —— `doom.ui-v2.0-beta.zip` 与 `SHA256SUMS.txt`。
+- **下载用的成品**：[`dist/`](dist) —— 三份变体 zip 与 `SHA256SUMS.txt`；其余两份变体的包体在 [`variants/`](variants/)。
 - **可切跑的门与打包脚本**：[`src/`](src/) —— 静态门（JSON / 引用闭包 / mcfunction 加载期规则）、结构门（泄漏 + 顶层白名单）、
   确定性打包脚本。不想读代码的话，直接下 `dist/` 的 zip 即可，**用不到 `src/`**。
 - **玩家手册**：[`docs/`](docs/README.md) —— 安装 / 用法与 API / 示例调用串 / 兼容与版本 / 致谢与许可。
 - 同一个版本也附在 [Releases](https://github.com/DoomDecapitator/doom.ui/releases)
   （附件名带版本号，正文有四段：下哪个 / 怎么装 / 校验值 / 源码在哪）。
 - **真机验收台与逐轮取证报告**放在私有开发仓库（不对外）：那套东西要一台开着 RCON 的服务器和一个真实客户端，
-  按仓库模板规矩不进这个仓库。想知道"它凭什么说 55/340 全绿"，看 [CHANGELOG.md](CHANGELOG.md) 的数字与结论。
+  按仓库模板规矩不进这个仓库。想知道"它凭什么说 53/335 全绿"，看 [CHANGELOG.md](CHANGELOG.md) 的数字与结论。
 
 ## 想改玩法 / 想改代码
 
